@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<implementation>
+  <functions>
+  </functions>
+  <files>L_ALTHUE.lua</files>
+  <startup>initstatus</startup>
+  <actionList>
+		<action>
+			<serviceId>urn:upnp-org:serviceId:althue1</serviceId>
+			<name>SetDebug</name>
+			<job>
+			setDebugMode(lul_device,lul_settings.newDebugMode)
+			return 4,0
+			</job>
+		</action>
+	
+		<action>
+			<serviceId>urn:upnp-org:serviceId:althue1</serviceId>
+			<name>Refresh</name>
+			<job>
+			refreshData(lul_device)
+			return 4,0
+			</job>
+		</action>
+
+		<action>
+		  <serviceId>urn:upnp-org:serviceId:althue1</serviceId>
+		  <name>PairWithHue</name>
+		  <run>
+				PairWithHue(lul_device)
+		  </run>
+		</action>
+
+		<action>
+		  <serviceId>urn:upnp-org:serviceId:althue1</serviceId>
+		  <name>UnpairWithHue</name>
+		  <run>
+				UnpairWithHue(lul_device)
+		  </run>
+		</action>
+
+		<action>
+		  <serviceId>urn:upnp-org:serviceId:althue1</serviceId>
+		  <name>RunHueScene</name>
+		  <run>
+				RunHueScene(lul_device,lul_settings.hueSceneID)
+		  </run>
+		</action>
+
+		<action>
+		  <serviceId>urn:upnp-org:serviceId:TemperatureSensor1</serviceId>
+		  <name>GetCurrentTemperature</name>
+		  <run>
+				getCurrentTemperature(lul_device)
+		  </run>
+		</action>
+		
+		<action>
+		  <serviceId>urn:upnp-org:serviceId:SwitchPower1</serviceId>
+		  <name>SetTarget</name>
+		  <run>
+				UserSetPowerTarget(lul_device,lul_settings.newTargetValue)
+		  </run>
+		</action>
+		
+		<action>
+		  <serviceId>urn:upnp-org:serviceId:Dimming1</serviceId>
+		  <name>SetLoadLevelTarget</name>
+		  <run>
+				UserSetLoadLevelTarget(lul_device,lul_settings.newLoadlevelTarget)
+		  </run>
+		</action>
+
+		<action>
+		  <serviceId>urn:micasaverde-com:serviceId:HaDevice1</serviceId>
+		  <name>ToggleState</name>
+		  <run>
+				UserToggleState(lul_device)
+		  </run>
+		</action>
+
+        <action>
+			<serviceId>urn:micasaverde-com:serviceId:Color1</serviceId>
+            <name>SetColorRGB</name>
+			<run>
+				UserSetColorRGB(lul_device,lul_settings.newColorRGBTarget)
+			</run>            
+        </action>
+        <action>
+			<serviceId>urn:micasaverde-com:serviceId:Color1</serviceId>
+            <name>SetColor</name>
+			<run>
+				UserSetColor(lul_device,lul_settings.newColorTarget)
+			</run>            
+        </action>
+		<action>
+			<serviceId>urn:micasaverde-com:serviceId:SecuritySensor1</serviceId>
+			<name>SetArmed</name>
+			<run>
+				UserSetArmed(lul_device,lul_settings.newArmedValue)
+			</run>
+		</action>
+		</actionList>
+</implementation>
