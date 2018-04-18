@@ -15,7 +15,7 @@ local version		= "v0.1"
 local JSON_FILE = "D_FLIPR.json"
 local UI7_JSON_FILE = "D_FLIPR_UI7.json"
 local DEFAULT_REFRESH = 10
-local hostname		= ""
+-- local hostname		= ""
 
 local json = require("dkjson")
 local mime = require('mime')
@@ -308,10 +308,10 @@ function myFLIPR_Handler(lul_request, lul_parameters, lul_outputformat)
   debug('myFLIPR_Handler: parameters is: '..json.encode(lul_parameters))
   local lul_html = "";	-- empty return by default
   local mime_type = "";
-  if (hostname=="") then
-	hostname = getIP()
-	debug("now hostname="..hostname)
-  end
+  -- if (hostname=="") then
+	-- hostname = getIP()
+	-- debug("now hostname="..hostname)
+  -- end
 
   -- find a parameter called "command"
   if ( lul_parameters["command"] ~= nil ) then
@@ -378,6 +378,11 @@ function refreshFLIPRData(lul_device,norefresh)
 	debug(string.format("refreshFLIPRData(%s,%s)",lul_device,tostring(norefresh)))
 	lul_device = tonumber(lul_device)
 	
+	if (norefresh==false) then
+		local period= getSetVariable(FLIPR_SERVICE, "RefreshPeriod", lul_device, DEFAULT_REFRESH)
+		debug(string.format("programming next refreshFLIPRData(%s) in %s sec",lul_device,period))
+		luup.call_delay("refreshFLIPRData",period,tostring(lul_device))
+	end
 	if (success==true) then
 		luup.variable_set(FLIPR_SERVICE, "LastValidComm", os.time(), lul_device)
 	end
@@ -389,21 +394,6 @@ local function startEngine(lul_device)
 	debug(string.format("startEngine(%s)",lul_device))
 	local success=false
 	lul_device = tonumber(lul_device)
-	MapUID2Index={}
-
-	local data,msg = getHueConfig(lul_device)
-	debug(string.format("return data: %s", json.encode(data or "nil")))
-	if (data == nil) then
-		-- Get Hue Config failed
-		UserMessage(string.format("Not able to reach the Hue Bridge (missing ip addr in attributes ?, device:%s, msg:%s",lul_device,msg),TASK_ERROR)
-		return success --false
-	else
-		setAttrIfChanged("manufacturer", data.name, lul_device)
-		setAttrIfChanged("model", data.modelid, lul_device)
-		setAttrIfChanged("mac", data.mac, lul_device)
-		setAttrIfChanged("name", data.name, lul_device)
-	end
-
 	success = PairWithFLIPR(lul_device) and refreshFLIPRData(lul_device)
 	return success
 end
@@ -426,8 +416,8 @@ function startupDeferred(lul_device)
 	end
 
 	if (debugmode=="1") then
-	DEBUG_MODE = true
-	UserMessage("Enabling debug mode for device:"..lul_device,TASK_BUSY)
+		DEBUG_MODE = true
+		UserMessage("Enabling debug mode for device:"..lul_device,TASK_BUSY)
 	end
 	local major,minor = 0,0
 	local tbl={}
@@ -491,7 +481,6 @@ local function checkVersion(lul_device)
 	end
   else
 	-- UI5 specific
-	LightTypes["Extended color light"]={  dtype="urn:schemas-upnp-org:device:DimmableLight:1" , dfile="D_DimmableRGBLight1.xml" }
   end
 end
 
@@ -500,7 +489,7 @@ function initstatus(lul_device)
   -- this_device = lul_device
   log("initstatus("..lul_device..") starting version: "..version)
   checkVersion(lul_device)
-  hostname = getIP()
+  -- hostname = getIP()
   local delay = 1	-- delaying first refresh by x seconds
   debug("initstatus("..lul_device..") startup for Root device, delay:"..delay)
   luup.call_delay("startupDeferred", delay, tostring(lul_device))
