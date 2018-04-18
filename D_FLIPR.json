@@ -1,15 +1,15 @@
 {
-  "flashicon": "http://raw.githubusercontent.com/amg0/ALTHUE/master/iconALTHUE.png",
-  "default_icon": "http://raw.githubusercontent.com/amg0/ALTHUE/master/iconALTHUE.png",
+  "flashicon": "http://raw.githubusercontent.com/amg0/FLIPR/master/iconFLIPR.png",
+  "default_icon": "http://raw.githubusercontent.com/amg0/FLIPR/master/iconFLIPR.png",
   "halloIconsDir": "pics\/hallo",
   "state_icons": [
-    "iconALTHUE_0.png",
-    "iconALTHUE_100.png",
+    "iconFLIPR_0.png",
+    "iconFLIPR_100.png",
 	{
-		"img": "https://raw.githubusercontent.com/amg0/ALTHUE/master/iconALTHUE_0.png",
+		"img": "https://raw.githubusercontent.com/amg0/FLIPR/master/iconFLIPR_0.png",
 		"conditions": [
 			{
-				"service": "urn:upnp-org:serviceId:althue1",
+				"service": "urn:upnp-org:serviceId:flipr1",
 				"variable": "IconCode",
 				"operator": "==",
 				"value": 0
@@ -17,10 +17,10 @@
 		]
 	},
 	{
-		"img": "https://raw.githubusercontent.com/amg0/ALTHUE/master/iconALTHUE_100.png",
+		"img": "https://raw.githubusercontent.com/amg0/FLIPR/master/iconFLIPR_100.png",
 		"conditions": [
 			{
-				"service": "urn:upnp-org:serviceId:althue1",
+				"service": "urn:upnp-org:serviceId:flipr1",
 				"variable": "IconCode",
 				"operator": "==",
 				"value": 100
@@ -36,7 +36,7 @@
     "doc_manual": 1,
     "doc_version": 1,
     "doc_platform": 0,
-    "doc_page": "https:\/\/github.com\/amg0\/ALTHue",
+    "doc_page": "https:\/\/github.com\/amg0\/FLIPR",
     "doc_forced_url": {
       "text": "http:\/\/www.google.com"
     }
@@ -100,12 +100,12 @@
 						},
 						"ControlGroup": "1",
 						"Display": {
-							"Service": "urn:upnp-org:serviceId:althue1",
+							"Service": "urn:upnp-org:serviceId:flipr1",
 							"Variable": "Debug",
 							"Value": "1"
 						},
 						"Command": {
-							"Service": "urn:upnp-org:serviceId:althue1",
+							"Service": "urn:upnp-org:serviceId:flipr1",
 							"Action": "SetDebug",
 							"Parameters": [
 								{
@@ -123,12 +123,12 @@
 						},
 						"ControlGroup": "1",
 						"Display": {
-							"Service": "urn:upnp-org:serviceId:althue1",
+							"Service": "urn:upnp-org:serviceId:flipr1",
 							"Variable": "Debug",
 							"Value": "0"
 						},
 						"Command": {
-							"Service": "urn:upnp-org:serviceId:althue1",
+							"Service": "urn:upnp-org:serviceId:flipr1",
 							"Action": "SetDebug",
 							"Parameters": [
 								{
@@ -147,7 +147,7 @@
 				"left": "0",
 				"text_align": "left",
 				"Label": {
-					"lang_tag": "ALTHUE_version",
+					"lang_tag": "FLIPR_version",
 					"text": "Version"
 				},
 				"Display": {
@@ -165,7 +165,7 @@
 				"x": "1",
 				"text_align": "left",
 				"Display": {
-					"Service": "urn:upnp-org:serviceId:althue1",
+					"Service": "urn:upnp-org:serviceId:flipr1",
 					"Variable": "Version",
 					"Top": 130,
 					"Left": 10,
@@ -183,8 +183,8 @@
 		"Position": "2",
 		"TopNavigationTab": "1",
 		"TabType": "javascript",
-		"ScriptName": "J_ALTHUE.js",
-		"Function": "ALTHUE_Settings"
+		"ScriptName": "J_FLIPR.js",
+		"Function": "FLIPR_Settings"
 	},
 	{
       "Label": {
@@ -206,37 +206,7 @@
       "ScriptName": "shared.js",
       "Function": "device_notifications"
     },
-	{
-		"Label": {
-			"lang_tag": "information",
-			"text": "Information"
-		},
-		"TopNavigationTab": "1",
-		"Position": "7",
-		"TabType": "javascript",
-		"ScriptName": "J_ALTHUE.js",
-		"Function": "ALTHUE_Information"
-	},
-	{
-		"Label": {
-			"lang_tag": "scenes",
-			"text": "Scenes"
-		},
-		"Position": "8",
-		"TabType": "javascript",
-		"ScriptName": "J_ALTUI.js",
-		"Function": "ALTHUE_Scenes"
-	},
-	{
-		"Label": {
-			"lang_tag": "applications",
-			"text": "Applications"
-		},
-		"Position": "9",
-		"TabType": "javascript",
-		"ScriptName": "J_ALTUI.js",
-		"Function": "ALTHUE_Applications"
-	},
+
 	{
 		"Label": {
 			"lang_tag": "donate",
@@ -245,8 +215,8 @@
 		"TopNavigationTab": "1",
 		"Position": "11",
 		"TabType": "javascript",
-		"ScriptName": "J_ALTHUE.js",
-		"Function": "ALTHUE_Donate"
+		"ScriptName": "J_FLIPR.js",
+		"Function": "FLIPR_Donate"
 	}
 ],
   "sceneList": {
@@ -257,10 +227,10 @@
       {
 		"id": 1,
 		"label": {
-			"lang_tag": "ALTHUE_reachable",
-			"text": "ALTHUE server is reachable or not"
+			"lang_tag": "FLIPR_reachable",
+			"text": "FLIPR server is reachable or not"
 		},
-		"serviceId": "urn:upnp-org:serviceId:althue1",
+		"serviceId": "urn:upnp-org:serviceId:flipr1",
 		"norepeat": "1",
 		"argumentList": [
 			{
@@ -271,14 +241,14 @@
 				{
 				  "Not Reachable": "0",
 				  "HumanFriendlyText": {
-					"lang_tag": "ALTHUE_device_away",
+					"lang_tag": "FLIPR_device_away",
 					"text": "_DEVICE_NAME_ is not reachable"
 				  }
 				},
 				{
 				  "Reachable": "100",
 				  "HumanFriendlyText": {
-					"lang_tag": "ALTHUE_device_present",
+					"lang_tag": "FLIPR_device_present",
 					"text": "_DEVICE_NAME_ is reachable"
 				  }
 				}
@@ -295,6 +265,6 @@
 		]
       }
   ],
-  "DeviceType": "urn:schemas-upnp-org:device:althue:1",
-  "device_type": "urn:schemas-upnp-org:device:althue:1"
+  "DeviceType": "urn:schemas-upnp-org:device:flipr:1",
+  "device_type": "urn:schemas-upnp-org:device:flipr:1"
 }

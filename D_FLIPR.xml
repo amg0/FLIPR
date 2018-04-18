@@ -5,27 +5,27 @@
     <minor>0</minor>
   </specVersion>
   <device>
-    <deviceType>urn:schemas-upnp-org:device:althue:1</deviceType>
-    <staticJson>D_ALTHUE.json</staticJson> 
-    <friendlyName>ALTHUE</friendlyName>
+    <deviceType>urn:schemas-upnp-org:device:flipr:1</deviceType>
+    <staticJson>D_FLIPR.json</staticJson> 
+    <friendlyName>FLIPR</friendlyName>
     <manufacturer>Amg0</manufacturer>
     <manufacturerURL>http://www.google.fr/</manufacturerURL>
-    <modelDescription>ALTHUE for Vera UI7</modelDescription>
-    <modelName>ALTHUE for Vera UI7</modelName>
+    <modelDescription>FLIPR for Vera UI7</modelDescription>
+    <modelName>FLIPR for Vera UI7</modelName>
     <modelNumber>1</modelNumber>
     <protocol>cr</protocol>
     <handleChildren>1</handleChildren>
 	<serviceList>
       <service>
-        <serviceType>urn:schemas-upnp-org:service:althue:1</serviceType>
-        <serviceId>urn:upnp-org:serviceId:althue1</serviceId>
-        <controlURL>/upnp/control/ALTHUE1</controlURL>
-        <eventSubURL>/upnp/event/ALTHUE1</eventSubURL>
-        <SCPDURL>S_ALTHUE.xml</SCPDURL>
+        <serviceType>urn:schemas-upnp-org:service:flipr:1</serviceType>
+        <serviceId>urn:upnp-org:serviceId:flipr1</serviceId>
+        <controlURL>/upnp/control/FLIPR1</controlURL>
+        <eventSubURL>/upnp/event/FLIPR1</eventSubURL>
+        <SCPDURL>S_FLIPR.xml</SCPDURL>
       </service>
     </serviceList>
     <implementationList>
-      <implementationFile>I_ALTHUE.xml</implementationFile>
+      <implementationFile>I_FLIPR.xml</implementationFile>
     </implementationList>
   </device>
 </root>
