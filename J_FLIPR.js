@@ -55,9 +55,6 @@ var FLIPR = (function(api,$) {
 		FLIPR_Svs 	: FLIPR_Svs,
 		Dump 		: FLIPR_Dump,
 		Settings 	: FLIPR_Settings,
-		Information : FLIPR_Information,
-		Applications: FLIPR_Applications,
-		Scenes		: FLIPR_Scenes,
 		
 		//-------------------------------------------------------------
 		// Helper functions to build URLs to call VERA code from JS

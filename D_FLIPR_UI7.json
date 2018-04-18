@@ -189,7 +189,7 @@
 	{
 		"Label": {
 			"lang_tag": "data",
-			"text": "Hue Data"
+			"text": "Data"
 		},
 		"Position": 3,
 		"TabType": "javascript",
