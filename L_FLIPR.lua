@@ -288,6 +288,10 @@ local function FLIPRHttpCall(lul_device,verb,cmd,body)
 	return json.decode(data) ,""
 end
 
+local function FLIPR_getToken(usr,pwd,serial)
+	debug(string.format("FLIPR_getToken(%s,%s,%s)",usr,pwd,serial))
+	return { result=false, message="not yet implemented" }
+end
 
 ------------------------------------------------------------------------------------------------
 -- Http handlers : Communication FROM ALTUI
@@ -330,6 +334,15 @@ function myFLIPR_Handler(lul_request, lul_parameters, lul_outputformat)
 	  function(params)
 		return "default handler / not successful", "text/plain"
 	  end,
+
+	  ["get_token"] =
+	  function(params)
+		local usr = lul_parameters["user"] or ""
+		local pwd = lul_parameters["password"] or ""
+		local serial = lul_parameters["serial"] or ""
+		local result = FLIPR_getToken(usr,pwd,serial)
+		return json.encode(result or {}), "application/json"
+	  end,
 	  
 	  -- ["config"] =
 	  -- function(params)
@@ -369,7 +382,12 @@ end
 --------------------------------------------------------
 local function PairWithFLIPR(lul_device)
 	debug(string.format("PairWithFLIPR(%s)",lul_device))
-	return false
+	local success = false
+	local credentials = getSetVariable(FLIPR_SERVICE, "Credentials", lul_device, "")
+	if (isempty(credentials)) then
+		error(string.format("The FLIPR plugin is not paired with the server"))
+	end
+	return success
 end
 
 function refreshFLIPRData(lul_device,norefresh)
@@ -404,8 +422,11 @@ function startupDeferred(lul_device)
 
 	local debugmode = getSetVariable(FLIPR_SERVICE, "Debug", lul_device, "0")
 	local oldversion = getSetVariable(FLIPR_SERVICE, "Version", lul_device, "")
-	local period= getSetVariable(FLIPR_SERVICE, "RefreshPeriod", lul_device, DEFAULT_REFRESH)
-	local credentials	 = getSetVariable(FLIPR_SERVICE, "Credentials", lul_device, "")
+	local period = getSetVariable(FLIPR_SERVICE, "RefreshPeriod", lul_device, DEFAULT_REFRESH)
+	local credentials = getSetVariable(FLIPR_SERVICE, "Credentials", lul_device, "")
+	local user = getSetVariable(FLIPR_SERVICE, "User", lul_device, "")
+	local pwd = getSetVariable(FLIPR_SERVICE, "Password", lul_device, "")
+	local serial = getSetVariable(FLIPR_SERVICE, "Serial", lul_device, "")
 	local iconCode = getSetVariable(FLIPR_SERVICE,"IconCode", lul_device, "0")
 	local lastvalid = getSetVariable(FLIPR_SERVICE,"LastValidComm", lul_device, "")
 

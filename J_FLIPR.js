@@ -47,8 +47,52 @@ var FLIPR = (function(api,$) {
 	//-------------------------------------------------------------	
 
 	function FLIPR_Settings(deviceID) {
-		var html = "Hello Settings";
+		var map = [
+			{ variable:'User', id:'flipr-user', label:'User' },
+			{ variable:'Password', id:'flipr-pwd', label:'Password' },
+			{ variable:'Serial', id:'flipr-serial', label:'Serial #' },
+			{ variable:'Credentials', id:'flipr-token', label:'API Token' },
+			{ variable:'', id:'flipr-pair', label:'Pair Device' },
+		]
+		var html = ""
+		var headings = "<tr><th></th><th></th></tr>"
+		var fields = [];
+		$.each( map, function( idx, item) {
+			var editor = (item.variable) 
+			? "<input id='{0}' value='{1}'></input>".format(item.id, get_device_state(deviceID,  FLIPR.FLIPR_Svs, item.variable,1))
+			: "<button id='{0}' class='btn btn-secondary btn-sm'>{1}</button>".format(item.id, item.label)
+			fields.push('<tr><td>{0}</td><td>{1}</td></tr>'.format(
+				"<label for='{0}'>{1}</label>".format(item.id,item.label),
+				editor )
+			)
+		})
+		fields.push('<tr><td>{0}</td><td>{1}</td></tr>'.format(
+			"",
+			"<button id='flipr-save' class='btn btn-primary'>Save</button>"
+		))
+
+		html += "<h3>Parameters</h3><table class='table'><thead>{0}</thead><tbody>{1}</tbody></table>".format(	
+			headings,
+			fields.join("\n") 
+		);
 		set_panel_html(html);
+		$("#flipr-save").click( function() {
+			var that = this
+			$.each(map, function(idx,item) {
+				var varVal = jQuery('#'+item.id).val()
+				FLIPR.saveVar(deviceID,  FLIPR.FLIPR_Svs, item.variable, varVal, false)
+			});
+		});
+		$("#flipr-pair").click( function() {
+			var url = FLIPR.buildHandlerUrl(deviceID,"get_token",{
+				user: jQuery("#flipr-user").val(),
+				password:jQuery("#flipr-pwd").val(),
+				serial:jQuery("#flipr-serial").val(),
+			})
+			$.get(url).done(function(data) {
+				alert( JSON.stringify(data) )
+			})
+		});
 	};
 	
 	var myModule = {
