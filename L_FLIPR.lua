@@ -177,7 +177,7 @@ local function task(text, mode)
   end
 end
 
-local function clearTask()
+function clearTask()
   task("Clearing...", TASK_SUCCESS)
 end
 
