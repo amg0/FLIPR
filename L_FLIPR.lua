@@ -14,14 +14,16 @@ local DEBUG_MODE	= false -- controlled by UPNP action
 local version		= "v0.1"
 local JSON_FILE = "D_FLIPR.json"
 local UI7_JSON_FILE = "D_FLIPR_UI7.json"
-local DEFAULT_REFRESH = 10
+local DEFAULT_REFRESH = 3600
 -- local hostname		= ""
 
 local json = require("dkjson")
 local mime = require('mime')
 local socket = require("socket")
 local http = require("socket.http")
+local https = require ("ssl.https")
 local ltn12 = require("ltn12")
+local modurl = require ("socket.url")
 
 ------------------------------------------------
 -- Debug --
@@ -240,35 +242,44 @@ end
 ------------------------------------------------
 -- Communication TO HUE system
 ------------------------------------------------
+-- POST	/ url	encode		https://apis.goflipr.com/OAuth2/token	
+-- GET https://apis.goflipr.com/modules/{serial}/survey/last 
+
 local function FLIPRHttpCall(lul_device,verb,cmd,body)
 	local result = {}
 	verb = verb or "GET"
 	cmd = cmd or ""
 	body = body or ""
-	debug(string.format("FLIPRHttpCall(%d,%s,%s,%s)",lul_device,verb,cmd,body))
+	debug(string.format("FLIPRHttpCall(%d,%s,%s,%s,%s)",lul_device,verb, cmd,body,serial or ''))
+	local serial = getSetVariable(FLIPR_SERVICE, "Serial", lul_device, "")
 	local credentials = getSetVariable(FLIPR_SERVICE, "Credentials", lul_device, "")
-	local ipaddr = luup.attr_get ('ip', lul_device )
-	local newUrl = string.format("http://%s/api/%s/%s",ipaddr,credentials,cmd)
+	local newUrl = (verb=="POST") and string.format("https://apis.goflipr.com/%s",cmd) 
+								  or string.format("https://apis.goflipr.com/modules/%s/%s",serial,cmd)
+					
 	debug(string.format("Calling Hue with %s %s , body:%s",verb,newUrl,body))
-	local request, code = http.request({
+	local headers = {
+		-- ["Connection"]= "keep-alive",
+		["Content-Length"] = body:len(),
+		["Content-Type"] = "application/x-www-form-urlencoded",
+		-- ["Origin"]="http://192.168.1.5",
+		-- ["User-Agent"]="Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.134 Safari/537.36",
+		["Accept"]="text/plain, */*; q=0.01"
+		-- ["X-Requested-With"]="XMLHttpRequest",
+		-- ["Accept-Encoding"]="gzip, deflate",
+		-- ["Accept-Language"]= "fr,fr-FR;q=0.8,en;q=0.6,en-US;q=0.4",
+	}
+	if not (isempty(credentials)) then 
+		headers["Authorization"] = string.format("Bearer %s",credentials)
+	end
+	local request, code, headers = https.request({
 		method=verb,
 		url = newUrl,
 		source= ltn12.source.string(body),
-		headers = {
-			-- ["Connection"]= "keep-alive",
-			["Content-Length"] = body:len(),
-			-- ["Origin"]="http://192.168.1.5",
-			-- ["User-Agent"]="Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.134 Safari/537.36",
-			-- ["Content-Type"] = "text/xml;charset=UTF-8",
-			["Accept"]="text/plain, */*; q=0.01"
-			-- ["X-Requested-With"]="XMLHttpRequest",
-			-- ["Accept-Encoding"]="gzip, deflate",
-			-- ["Accept-Language"]= "fr,fr-FR;q=0.8,en;q=0.6,en-US;q=0.4",
-		},
+		headers = headers,
 		sink = ltn12.sink.table(result)
 	})
 
-		-- fail to connect
+	-- fail to connect
 	if (request==nil) then
 		error(string.format("failed to connect to %s, http.request returned nil", newUrl))
 		return nil,"failed to connect"
@@ -284,13 +295,32 @@ local function FLIPRHttpCall(lul_device,verb,cmd,body)
 	local data = table.concat(result)
 	debug(string.format("request:%s",request))
 	debug(string.format("code:%s",code))
+	debug(string.format("headers:%s",json.encode(headers)))
 	debug(string.format("data:%s",data or ""))
 	return json.decode(data) ,""
 end
 
-local function FLIPR_getToken(usr,pwd,serial)
-	debug(string.format("FLIPR_getToken(%s,%s,%s)",usr,pwd,serial))
-	return { result=false, message="not yet implemented" }
+local function FLIPR_getToken(lul_device,usr,pwd,serial)
+	debug(string.format("FLIPR_getToken(%s,%s,%s,%s)",lul_device,usr,pwd,serial))
+	local res,msg = FLIPRHttpCall(lul_device,
+		'POST',
+		'OAuth2/token',
+		string.format('grant_type=password&password=%s&username=%s',modurl.escape(pwd),modurl.escape(usr)) -- MyVariableOne=ValueOne&MyVariableTwo=ValueTwo
+	)
+	if (res~=nil) then
+		setVariableIfChanged(FLIPR_SERVICE, "Credentials", res.access_token, lul_device)
+		setVariableIfChanged(FLIPR_SERVICE, "User", usr, lul_device )
+		setVariableIfChanged(FLIPR_SERVICE, "Password", pwd, lul_device )
+		setVariableIfChanged(FLIPR_SERVICE, "Serial", serial, lul_device )
+	end
+	return { result=res, message=msg }
+end
+
+local function FLIPR_getData(lul_device)
+	debug(string.format("FLIPR_getData(%s)",lul_device))
+	local serial = getSetVariable(FLIPR_SERVICE, "Serial", lul_device, "")
+	local res,msg = FLIPRHttpCall(lul_device, 'GET', 'survey/last') 
+	return { result=res, message=msg }
 end
 
 ------------------------------------------------------------------------------------------------
@@ -340,17 +370,21 @@ function myFLIPR_Handler(lul_request, lul_parameters, lul_outputformat)
 		local usr = lul_parameters["user"] or ""
 		local pwd = lul_parameters["password"] or ""
 		local serial = lul_parameters["serial"] or ""
-		local result = FLIPR_getToken(usr,pwd,serial)
+		local result = FLIPR_getToken(deviceID,usr,pwd,serial)
 		return json.encode(result or {}), "application/json"
 	  end,
 	  
+	  ["get_data"] =
+	  function(params)
+		local result = FLIPR_getData(deviceID)
+		return json.encode(result or {}), "application/json"
+	  end,
 	  -- ["config"] =
 	  -- function(params)
 		-- local url = lul_parameters["url"] or ""
 		-- local data,msg = FLIPRHttpCall(deviceID,"GET",url)
 		-- return json.encode(data or {}), "application/json"
 	  -- end,  
-
   }
   -- actual call
   lul_html , mime_type = switch(command,action)(lul_parameters)
@@ -382,10 +416,13 @@ end
 --------------------------------------------------------
 local function PairWithFLIPR(lul_device)
 	debug(string.format("PairWithFLIPR(%s)",lul_device))
-	local success = false
+	local success = true
 	local credentials = getSetVariable(FLIPR_SERVICE, "Credentials", lul_device, "")
 	if (isempty(credentials)) then
-		error(string.format("The FLIPR plugin is not paired with the server"))
+		local user = getSetVariable(FLIPR_SERVICE, "User", lul_device, "")
+		local pwd = getSetVariable(FLIPR_SERVICE, "Password", lul_device, "")
+		local data = FLIPR_getToken(lul_device,usr,pwd,serial)
+		success = (data.result ~= nil)
 	end
 	return success
 end
@@ -396,15 +433,20 @@ function refreshFLIPRData(lul_device,norefresh)
 	debug(string.format("refreshFLIPRData(%s,%s)",lul_device,tostring(norefresh)))
 	lul_device = tonumber(lul_device)
 	
-	if (norefresh==false) then
-		local period= getSetVariable(FLIPR_SERVICE, "RefreshPeriod", lul_device, DEFAULT_REFRESH)
-		debug(string.format("programming next refreshFLIPRData(%s) in %s sec",lul_device,period))
-		luup.call_delay("refreshFLIPRData",period,tostring(lul_device))
-	end
+	local data = FLIPR_getData(lul_device)
+	success = (data.result ~= nil )
+	
 	if (success==true) then
+		-- program next refresh
 		luup.variable_set(FLIPR_SERVICE, "LastValidComm", os.time(), lul_device)
+		if (norefresh==false) then
+			local period= getSetVariable(FLIPR_SERVICE, "RefreshPeriod", lul_device, DEFAULT_REFRESH)
+			debug(string.format("programming next refreshFLIPRData(%s) in %s sec",lul_device,period))
+			luup.call_delay("refreshFLIPRData",period,tostring(lul_device))
+		end
+	else
+		warning(string.format("FLIPR_getData did not succeed, engine is stopped until the next reload"))
 	end
-	debug(string.format("refreshFLIPRData returns  success is : %s",tostring(success)))
 	return success
 end
 

@@ -34,12 +34,19 @@ var FLIPR = (function(api,$) {
 	var FLIPR_Svs = 'urn:upnp-org:serviceId:flipr1';
 	jQuery("body").prepend("<style>.FLIPR-cls { width:100%; }</style>")
 
+	function isNullOrEmpty(value) {
+		return (value == null || value.length === 0);	// undefined == null also
+	};
+	
 	//-------------------------------------------------------------
 	// Device TAB : Dump Json
 	//-------------------------------------------------------------	
 	function FLIPR_Dump(deviceID) {
-		var html = "Hello Dump";
-		set_panel_html(html);
+		var url = FLIPR.buildHandlerUrl(deviceID,"get_data",{})
+		$.get(url).done(function(data) {
+			var html = JSON.stringify(data,null,2)
+			set_panel_html( "<pre>{0}</pre>".format(html) )
+		})
 	};
 	
 	//-------------------------------------------------------------
@@ -47,20 +54,22 @@ var FLIPR = (function(api,$) {
 	//-------------------------------------------------------------	
 
 	function FLIPR_Settings(deviceID) {
+		var credentials = get_device_state(deviceID,  FLIPR.FLIPR_Svs, 'Credentials',1)
 		var map = [
 			{ variable:'User', id:'flipr-user', label:'User' },
 			{ variable:'Password', id:'flipr-pwd', label:'Password' },
 			{ variable:'Serial', id:'flipr-serial', label:'Serial #' },
-			{ variable:'Credentials', id:'flipr-token', label:'API Token' },
-			{ variable:'', id:'flipr-pair', label:'Pair Device' },
+			{ value:credentials, id:'flipr-token', label:'API Token' },
+			{ id:'flipr-pair', label:'Pair Device' },
 		]
 		var html = ""
 		var headings = "<tr><th></th><th></th></tr>"
 		var fields = [];
 		$.each( map, function( idx, item) {
-			var editor = (item.variable) 
-			? "<input id='{0}' value='{1}'></input>".format(item.id, get_device_state(deviceID,  FLIPR.FLIPR_Svs, item.variable,1))
-			: "<button id='{0}' class='btn btn-secondary btn-sm'>{1}</button>".format(item.id, item.label)
+			var value = (item.value!=undefined) ? item.value : get_device_state(deviceID,  FLIPR.FLIPR_Svs, item.variable,1)
+			var editor = (item.variable==undefined && item.value==undefined) 
+			? "<button id='{0}' class='btn btn-secondary btn-sm'>{1}</button>".format(item.id, item.label)
+			: "<input id='{0}' value='{1}'></input>".format(item.id, value)
 			fields.push('<tr><td>{0}</td><td>{1}</td></tr>'.format(
 				"<label for='{0}'>{1}</label>".format(item.id,item.label),
 				editor )
