@@ -462,13 +462,13 @@ function refreshFLIPRData(lul_device,norefresh)
 		for key,entry in pairs(DataDecodeMap) do
 			local flipr_data = data.result
 			-- debug(string.format("entry:%s",json.encode(entry)))
-			debug(string.format("flipr_data:%s",json.encode(flipr_data)))
+			-- debug(string.format("flipr_data:%s",json.encode(flipr_data)))
 			local parts = Split(key,'%.')
-			debug(string.format("parts:%s",json.encode(parts)))
+			-- debug(string.format("parts:%s",json.encode(parts)))
 			for i,path in pairs(parts) do
-				debug(string.format("path:%s",json.encode(path)))
+				-- debug(string.format("path:%s",json.encode(path)))
 				flipr_data = flipr_data[ path ]
-				debug(string.format("flipr_data:%s",json.encode(flipr_data)))
+				-- debug(string.format("flipr_data:%s",json.encode(flipr_data)))
 			end
 			if (entry.variable ~=nil) then
 				if (entry.func~=nil) then
