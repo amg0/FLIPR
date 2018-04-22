@@ -23,7 +23,12 @@
         <eventSubURL>/upnp/event/FLIPR1</eventSubURL>
         <SCPDURL>S_FLIPR.xml</SCPDURL>
       </service>
-    </serviceList>
+      <service>
+        <serviceType>urn:schemas-upnp-org:service:TemperatureSensor:1</serviceType>
+        <serviceId>urn:upnp-org:serviceId:TemperatureSensor1</serviceId>
+        <SCPDURL>S_TemperatureSensor1.xml</SCPDURL>
+      </service>
+	</serviceList>
     <implementationList>
       <implementationFile>I_FLIPR.xml</implementationFile>
     </implementationList>

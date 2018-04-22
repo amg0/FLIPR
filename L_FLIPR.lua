@@ -434,12 +434,18 @@ local function PairWithFLIPR(lul_device)
 	return success
 end
 
+local function calculateBattery(value)
+	return 100 - tonumber(value)
+end
+
 local DataDecodeMap = {
 	["OxydoReductionPotentiel.Value"] 	= { variable="OxydoReduction", service=FLIPR_SERVICE },
 	["PH.Value"] 						= { variable="PH", service=FLIPR_SERVICE },
 	["Desinfectant.Deviation"] 			= { variable="Desinfectant_Deviation", service=FLIPR_SERVICE },
 	["UvIndex"]							= { variable="UvIndex", service=FLIPR_SERVICE },
+	["Temperature"]						= { variable="CurrentTemperature", service="urn:upnp-org:serviceId:TemperatureSensor1" },
 	["CloudCoverage"] 					= { variable="CloudCoverage", service=FLIPR_SERVICE },
+	["Battery.Deviation"] 				= { variable="BatteryLevel", service="urn:micasaverde-com:serviceId:HaDevice1", func=calculateBattery }
 }
 
 function refreshFLIPRData(lul_device,norefresh)
@@ -455,7 +461,7 @@ function refreshFLIPRData(lul_device,norefresh)
 		-- decoding according to map
 		for key,entry in pairs(DataDecodeMap) do
 			local flipr_data = data.result
-			debug(string.format("entry:%s",json.encode(entry)))
+			-- debug(string.format("entry:%s",json.encode(entry)))
 			debug(string.format("flipr_data:%s",json.encode(flipr_data)))
 			local parts = Split(key,'%.')
 			debug(string.format("parts:%s",json.encode(parts)))
@@ -464,8 +470,13 @@ function refreshFLIPRData(lul_device,norefresh)
 				flipr_data = flipr_data[ path ]
 				debug(string.format("flipr_data:%s",json.encode(flipr_data)))
 			end
-			if (entry.variable ~=nil) and (flipr_data ~= nil) then
-				setVariableIfChanged(entry.service, entry.variable, flipr_data, lul_device )
+			if (entry.variable ~=nil) then
+				if (entry.func~=nil) then
+					flipr_data = (entry.func)(flipr_data)
+				end
+				if (flipr_data ~=nil) then
+					setVariableIfChanged(entry.service, entry.variable, flipr_data, lul_device )
+				end
 			end
 		end
 		-- program next refresh
@@ -504,9 +515,9 @@ function startupDeferred(lul_device)
 	local lastvalid = getSetVariable(FLIPR_SERVICE,"LastValidComm", lul_device, "")
 
 	-- sanitize
-	if (tonumber(period)==0) then
+	local p = tonumber(period)
+	if (p<1800) then
 		setVariableIfChanged(FLIPR_SERVICE, "RefreshPeriod", DEFAULT_REFRESH, lul_device)
-		period=DEFAULT_REFRESH
 	end
 
 	if (debugmode=="1") then
