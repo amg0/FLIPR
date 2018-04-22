@@ -216,6 +216,10 @@ local function Split(str, delim, maxNb)
   return result
 end
 
+function string:fliprsplit(sep) -- from http://lua-users.org/wiki/SplitJoin	 : changed as consecutive delimeters was not returning empty strings
+	return Split(self, sep)
+end
+
 -- function string:split(sep) -- from http://lua-users.org/wiki/SplitJoin	 : changed as consecutive delimeters was not returning empty strings
   -- return Split(self, sep)
 -- end
@@ -367,9 +371,9 @@ function myFLIPR_Handler(lul_request, lul_parameters, lul_outputformat)
 
 	  ["get_token"] =
 	  function(params)
-		local usr = lul_parameters["user"] or ""
-		local pwd = lul_parameters["password"] or ""
-		local serial = lul_parameters["serial"] or ""
+		local usr = modurl.unescape(lul_parameters["user"] or "")
+		local pwd = modurl.unescape(lul_parameters["password"] or "")
+		local serial = modurl.unescape(lul_parameters["serial"] or "")
 		local result = FLIPR_getToken(deviceID,usr,pwd,serial)
 		return json.encode(result or {}), "application/json"
 	  end,
@@ -427,6 +431,14 @@ local function PairWithFLIPR(lul_device)
 	return success
 end
 
+local DataDecodeMap = {
+	["OxydoReductionPotentiel.Value"] 	= { variable="OxydoReduction", service=FLIPR_SERVICE },
+	["PH.Value"] 						= { variable="PH", service=FLIPR_SERVICE },
+	["Desinfectant.Deviation"] 			= { variable="Desinfectant_Deviation", service=FLIPR_SERVICE },
+	["UvIndex"]							= { variable="UvIndex", service=FLIPR_SERVICE },
+	["CloudCoverage"] 					= { variable="CloudCoverage", service=FLIPR_SERVICE },
+}
+
 function refreshFLIPRData(lul_device,norefresh)
 	local success=false
 	norefresh = norefresh or false
@@ -437,6 +449,22 @@ function refreshFLIPRData(lul_device,norefresh)
 	success = (data.result ~= nil )
 	
 	if (success==true) then
+		-- decoding according to map
+		for key,entry in pairs(DataDecodeMap) do
+			local flipr_data = data.result
+			debug(string.format("entry:%s",json.encode(entry)))
+			debug(string.format("flipr_data:%s",json.encode(flipr_data)))
+			local parts = Split(key,'%.')
+			debug(string.format("parts:%s",json.encode(parts)))
+			for i,path in pairs(parts) do
+				debug(string.format("path:%s",json.encode(path)))
+				flipr_data = flipr_data[ path ]
+				debug(string.format("flipr_data:%s",json.encode(flipr_data)))
+			end
+			if (entry.variable ~=nil) and (flipr_data ~= nil) then
+				setVariableIfChanged(entry.service, entry.variable, flipr_data, lul_device )
+			end
+		end
 		-- program next refresh
 		luup.variable_set(FLIPR_SERVICE, "LastValidComm", os.time(), lul_device)
 		if (norefresh==false) then
