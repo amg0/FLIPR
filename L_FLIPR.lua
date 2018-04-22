@@ -316,6 +316,9 @@ local function FLIPR_getToken(lul_device,usr,pwd,serial)
 		setVariableIfChanged(FLIPR_SERVICE, "User", usr, lul_device )
 		setVariableIfChanged(FLIPR_SERVICE, "Password", pwd, lul_device )
 		setVariableIfChanged(FLIPR_SERVICE, "Serial", serial, lul_device )
+		setVariableIfChanged(FLIPR_SERVICE, "IconCode", "100", lul_device)
+	else
+		setVariableIfChanged(FLIPR_SERVICE, "IconCode", "0", lul_device)
 	end
 	return { result=res, message=msg }
 end

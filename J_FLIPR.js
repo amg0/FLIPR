@@ -67,31 +67,37 @@ var FLIPR = (function(api,$) {
 		var fields = [];
 		$.each( map, function( idx, item) {
 			var value = (item.value!=undefined) ? item.value : get_device_state(deviceID,  FLIPR.FLIPR_Svs, item.variable,1)
-			var editor = (item.variable==undefined && item.value==undefined) 
-			? "<button id='{0}' class='btn btn-secondary btn-sm'>{1}</button>".format(item.id, item.label)
-			: "<input id='{0}' value='{1}'></input>".format(item.id, value)
+			var editor = ""
+			if (item.variable==undefined && item.value==undefined) {
+				editor = "<button id='{0}' class='btn btn-secondary btn-sm'>{1}</button>".format(item.id, item.label)
+			} else if (item.value==undefined) {
+				editor = "<input id='{0}' value='{1}'></input>".format(item.id, value)
+			} else {
+				editor = "<input value='{0}' disabled></input>".format(value)
+			}
 			fields.push('<tr><td>{0}</td><td>{1}</td></tr>'.format(
 				"<label for='{0}'>{1}</label>".format(item.id,item.label),
 				editor )
 			)
 		})
-		fields.push('<tr><td>{0}</td><td>{1}</td></tr>'.format(
-			"",
-			"<button id='flipr-save' class='btn btn-primary'>Save</button>"
-		))
+		// fields.push('<tr><td>{0}</td><td>{1}</td></tr>'.format(
+			// "",
+			// "<button id='flipr-save' class='btn btn-primary'>Save</button>"
+		// ))
 
 		html += "<h3>Parameters</h3><table class='table'><thead>{0}</thead><tbody>{1}</tbody></table>".format(	
 			headings,
 			fields.join("\n") 
 		);
-		set_panel_html(html);
-		$("#flipr-save").click( function() {
-			var that = this
-			$.each(map, function(idx,item) {
-				var varVal = jQuery('#'+item.id).val()
-				FLIPR.saveVar(deviceID,  FLIPR.FLIPR_Svs, item.variable, varVal, false)
-			});
-		});
+		// set_panel_html(html);
+		api.setCpanelContent(html);
+		// $("#flipr-save").click( function() {
+			// var that = this
+			// $.each(map, function(idx,item) {
+				// var varVal = jQuery('#'+item.id).val()
+				// FLIPR.saveVar(deviceID,  FLIPR.FLIPR_Svs, item.variable, varVal, false)
+			// });
+		// });
 		$("#flipr-pair").click( function() {
 			var url = FLIPR.buildHandlerUrl(deviceID,"get_token",{
 				user: jQuery("#flipr-user").val(),
@@ -99,7 +105,7 @@ var FLIPR = (function(api,$) {
 				serial:jQuery("#flipr-serial").val(),
 			})
 			$.get(url).done(function(data) {
-				alert( JSON.stringify(data) )
+				alert ( (data.result != undefined) ? "Success" : ("Pairing failed : "+data.message ) )
 			})
 		});
 	};
