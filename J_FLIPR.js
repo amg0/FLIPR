@@ -103,8 +103,8 @@ var FLIPR = (function(api,$) {
 			headings,
 			fields.join("\n") 
 		);
-		// set_panel_html(html);
-		api.setCpanelContent(html);
+		set_panel_html(html);
+		// api.setCpanelContent(html);
 		// $("#flipr-save").click( function() {
 			// var that = this
 			// $.each(map, function(idx,item) {
