@@ -11,7 +11,7 @@
 //-------------------------------------------------------------
 // FLIPR  Plugin javascript Tabs
 //-------------------------------------------------------------
-
+/*
 if (typeof String.prototype.format == 'undefined') {
 	String.prototype.format = function()
 	{
@@ -28,7 +28,7 @@ if (typeof String.prototype.format == 'undefined') {
 		});
 	};
 };
-
+*/
 var myapi = window.api || null
 var FLIPR = (function(api,$) {
 	var FLIPR_Svs = 'urn:upnp-org:serviceId:flipr1';
@@ -38,6 +38,19 @@ var FLIPR = (function(api,$) {
 		return (value == null || value.length === 0);	// undefined == null also
 	};
 	
+	function format(str)
+	{
+	   var content = str;
+	   for (var i=1; i < arguments.length; i++)
+	   {
+			var replacement = new RegExp('\\{' + (i-1) + '\\}', 'g');	// regex requires \ and assignment into string requires \\,
+			// if ($.type(arguments[i]) === "string")
+				// arguments[i] = arguments[i].replace(/\$/g,'$');
+			content = content.replace(replacement, arguments[i]);  
+	   }
+	   return content;
+	};
+	
 	//-------------------------------------------------------------
 	// Device TAB : Dump Json
 	//-------------------------------------------------------------	
@@ -45,7 +58,7 @@ var FLIPR = (function(api,$) {
 		var url = FLIPR.buildHandlerUrl(deviceID,"get_data",{})
 		$.get(url).done(function(data) {
 			var html = JSON.stringify(data,null,2)
-			set_panel_html( "<pre>{0}</pre>".format(html) )
+			set_panel_html( FLIPR.format("<pre>{0}</pre>",html) )
 		})
 	};
 	
@@ -69,23 +82,24 @@ var FLIPR = (function(api,$) {
 			var value = (item.value!=undefined) ? item.value : get_device_state(deviceID,  FLIPR.FLIPR_Svs, item.variable,1)
 			var editor = ""
 			if (item.variable==undefined && item.value==undefined) {
-				editor = "<button id='{0}' class='btn btn-secondary btn-sm'>{1}</button>".format(item.id, item.label)
+				editor = FLIPR.format("<button id='{0}' class='btn btn-secondary btn-sm'>{1}</button>", item.id, item.label)
 			} else if (item.value==undefined) {
-				editor = "<input id='{0}' value='{1}'></input>".format(item.id, value)
+				editor = FLIPR.format("<input id='{0}' value='{1}'></input>",item.id, value)
 			} else {
-				editor = "<input value='{0}' disabled></input>".format(value)
+				editor = FLIPR.format("<input value='{0}' disabled></input>",value)
 			}
-			fields.push('<tr><td>{0}</td><td>{1}</td></tr>'.format(
-				"<label for='{0}'>{1}</label>".format(item.id,item.label),
-				editor )
-			)
+			fields.push( 
+				FLIPR.format('<tr><td>{0}</td><td>{1}</td></tr>',
+					FLIPR.format("<label for='{0}'>{1}</label>",item.id,item.label),
+					editor ) 
+				)
 		})
 		// fields.push('<tr><td>{0}</td><td>{1}</td></tr>'.format(
 			// "",
 			// "<button id='flipr-save' class='btn btn-primary'>Save</button>"
 		// ))
 
-		html += "<h3>Parameters</h3><table class='table'><thead>{0}</thead><tbody>{1}</tbody></table>".format(	
+		html += FLIPR.format("<h3>Parameters</h3><table class='table'><thead>{0}</thead><tbody>{1}</tbody></table>",
 			headings,
 			fields.join("\n") 
 		);
@@ -112,6 +126,7 @@ var FLIPR = (function(api,$) {
 	
 	var myModule = {
 		FLIPR_Svs 	: FLIPR_Svs,
+		format		: format,
 		Dump 		: FLIPR_Dump,
 		Settings 	: FLIPR_Settings,
 		
@@ -221,18 +236,18 @@ var FLIPR = (function(api,$) {
 				});
 
 				var bFirst=true;
-				html+="<table id='{1}' class='table {2} table-sm table-hover table-striped {0}'>".format(cls || '', htmlid || 'altui-grid' , responsive );
+				html+= FLIPR.format("<table id='{1}' class='table {2} table-sm table-hover table-striped {0}'>",cls || '', htmlid || 'altui-grid' , responsive );
 				if (caption)
-					html += "<caption>{0}</caption>".format(caption)
+					html += FLIPR.format("<caption>{0}</caption>",caption)
 				$.each(arr, function(idx,obj) {
 					if (bFirst) {
 						html+="<thead>"
 						html+="<tr>"
 						$.each(display_order,function(_k,k) {
-							html+="<th style='text-transform: capitalize;' data-column-id='{0}' {1} {2}>".format(
+							html+=FLIPR.format("<th style='text-transform: capitalize;' data-column-id='{0}' {1} {2}>",
 								k,
 								(k==idcolumn) ? "data-identifier='true'" : "",
-								"data-visible='{0}'".format( $.inArray(k,viscols)!=-1 )
+								FLIPR.format("data-visible='{0}'", $.inArray(k,viscols)!=-1 )
 							)
 							html+=k;
 							html+="</th>"
@@ -254,7 +269,7 @@ var FLIPR = (function(api,$) {
 				html+="</table>";
 			}
 			else
-				html +="<div>{0}</div>".format("No data to display")
+				html +=FLIPR.format("<div>{0}</div>","No data to display")
 
 			return html;		
 		}

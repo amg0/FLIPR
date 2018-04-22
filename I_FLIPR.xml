@@ -18,7 +18,7 @@
 			<serviceId>urn:upnp-org:serviceId:flipr1</serviceId>
 			<name>Refresh</name>
 			<job>
-			refreshData(lul_device)
+			refreshFLIPRData(lul_device,true)
 			return 4,0
 			</job>
 		</action>
