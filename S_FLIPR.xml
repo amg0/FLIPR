@@ -17,11 +17,17 @@
             <defaultValue>0</defaultValue>
             <shortCode>iconcode</shortCode>
         </stateVariable>
-        <stateVariable sendEvents="no">
-            <name>HueSceneID</name>
-            <dataType>string</dataType>
-            <defaultValue></defaultValue>
-            <shortCode>huesceneid</shortCode>
+        <stateVariable sendEvents="yes">
+            <name>PH</name>
+            <dataType>float</dataType>
+            <defaultValue>7</defaultValue>
+            <shortCode>ph</shortCode>
+        </stateVariable>
+        <stateVariable sendEvents="yes">
+            <name>CurrentTemperature</name>
+            <dataType>float</dataType>
+            <defaultValue>0</defaultValue>
+            <shortCode>currenttemperature</shortCode>
         </stateVariable>
 	</serviceStateTable>
     <actionList>

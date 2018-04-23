@@ -263,7 +263,115 @@
 			  }
 			}
 		]
-      }
+      },
+	  {
+		"id": 2,
+		"label": {
+			"lang_tag": "ph_goes_below",
+			"text": "PH goes below"
+		},
+		"serviceId": "urn:upnp-org:serviceId:flipr1",
+		"norepeat": "1",
+		"argumentList": [
+			{
+				"id": 1,
+				"dataType": "float",
+				"name": "PH",
+				"comparisson": "<",
+				"prefix": {
+					"lang_tag": "ph",
+					"text": "PH"
+				},
+				"suffix": {
+				},
+				"HumanFriendlyText": {
+					"lang_tag": "ph_goes_below",
+					"text": "_DEVICE_NAME_ PH goes below _ARGUMENT_VALUE_ "
+				}
+			}
+		]
+	  },
+	  {
+		"id": 3,
+		"label": {
+			"lang_tag": "ph_goes_above",
+			"text": "PH goes above"
+		},
+		"serviceId": "urn:upnp-org:serviceId:flipr1",
+		"norepeat": "1",
+		"argumentList": [
+			{
+				"id": 1,
+				"dataType": "float",
+				"name": "PH",
+				"comparisson": ">",
+				"prefix": {
+					"lang_tag": "ph",
+					"text": "PH"
+				},
+				"suffix": {
+				},
+				"HumanFriendlyText": {
+					"lang_tag": "ph_goes_above",
+					"text": "_DEVICE_NAME_ PH goes above _ARGUMENT_VALUE_ "
+				}
+			}
+		]
+	  },
+	  {
+		"id": 4,
+		"label": {
+			"lang_tag": "temperature_goes_above",
+			"text": "Temperature goes above"
+		},
+		"serviceId": "urn:upnp-org:serviceId:flipr1",
+		"norepeat": "1",
+		"argumentList": [
+			{
+				"id": 1,
+				"dataType": "float",
+				"name": "CurrentTemperature",
+				"comparisson": ">",
+				"prefix": {
+					"lang_tag": "temperature",
+					"text": "Temperature"
+				},
+				"suffix": {
+				},
+				"HumanFriendlyText": {
+					"lang_tag": "temperature_goes_above",
+					"text": "_DEVICE_NAME_ Temperature goes above _ARGUMENT_VALUE_ "
+				}
+			}
+		]
+	  },
+	  {
+		"id": 5,
+		"label": {
+			"lang_tag": "temperature_goes_below",
+			"text": "Temperature goes below"
+		},
+		"serviceId": "urn:upnp-org:serviceId:flipr1",
+		"norepeat": "1",
+		"argumentList": [
+			{
+				"id": 1,
+				"dataType": "float",
+				"name": "CurrentTemperature",
+				"comparisson": "<",
+				"prefix": {
+					"lang_tag": "temperature",
+					"text": "Temperature"
+				},
+				"suffix": {
+				},
+				"HumanFriendlyText": {
+					"lang_tag": "temperature_goes_below",
+					"text": "_DEVICE_NAME_ Temperature goes below _ARGUMENT_VALUE_ "
+				}
+			}
+		]
+	  }
   ],
   "DeviceType": "urn:schemas-upnp-org:device:flipr:1",
   "device_type": "urn:schemas-upnp-org:device:flipr:1"
