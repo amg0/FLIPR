@@ -14,7 +14,7 @@
     <modelName>FLIPR for Vera UI7</modelName>
     <modelNumber>1</modelNumber>
     <protocol>cr</protocol>
-    <handleChildren>1</handleChildren>
+	<handleChildren>1</handleChildren>
 	<serviceList>
       <service>
         <serviceType>urn:schemas-upnp-org:service:flipr:1</serviceType>
