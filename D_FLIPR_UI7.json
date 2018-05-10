@@ -1,12 +1,12 @@
 {
-  "flashicon": "http://raw.githubusercontent.com/amg0/FLIPR/master/iconFLIPR.png",
-  "default_icon": "http://raw.githubusercontent.com/amg0/FLIPR/master/iconFLIPR.png",
+  "flashicon": "https://cdn.rawgit.com/amg0/FLIPR/c00a0a7c/iconFLIPR.png",
+  "default_icon": "https://cdn.rawgit.com/amg0/FLIPR/c00a0a7c/iconFLIPR.png",
   "halloIconsDir": "pics\/hallo",
   "state_icons": [
     "iconFLIPR_0.png",
     "iconFLIPR_100.png",
 	{
-		"img": "http://raw.githubusercontent.com/amg0/FLIPR/master/iconFLIPR_0.png",
+		"img": "https://cdn.rawgit.com/amg0/FLIPR/c00a0a7c/iconFLIPR_0.png",
 		"conditions": [
 			{
 				"service": "urn:upnp-org:serviceId:flipr1",
@@ -17,7 +17,7 @@
 		]
 	},
 	{
-		"img": "http://raw.githubusercontent.com/amg0/FLIPR/master/iconFLIPR_100.png",
+		"img": "https://cdn.rawgit.com/amg0/FLIPR/c00a0a7c/iconFLIPR_100.png",
 		"conditions": [
 			{
 				"service": "urn:upnp-org:serviceId:flipr1",
