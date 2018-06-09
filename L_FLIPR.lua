@@ -11,7 +11,7 @@ local FLIPR_SERVICE	= "urn:upnp-org:serviceId:flipr1"
 local devicetype	= "urn:schemas-upnp-org:device:flipr:1"
 -- local this_device	= nil
 local DEBUG_MODE	= false -- controlled by UPNP action
-local version		= "v0.2"
+local version		= "v0.3"
 local JSON_FILE = "D_FLIPR.json"
 local UI7_JSON_FILE = "D_FLIPR_UI7.json"
 local DEFAULT_REFRESH = 3600
@@ -244,10 +244,43 @@ local function tablelength(T)
 end
 
 ------------------------------------------------
--- Communication TO HUE system
+-- Communication TO FLIPR system
 ------------------------------------------------
 -- POST	/ url	encode		https://apis.goflipr.com/OAuth2/token	
 -- GET https://apis.goflipr.com/modules/{serial}/survey/last 
+
+local function IOExec(command)
+	debug(string.format("IOExec(%s)",command))
+    local result = nil
+	local file = io.popen(command)
+	if file then
+		result = file:read("*a")
+		file:close()
+	end
+	return result
+end
+
+local function MyHttpsRequest( obj )
+	debug(string.format("MyHttpsRequest(%s)",json.encode(obj)))
+	local cmd = {}
+	table.insert(cmd, "curl")
+	table.insert(cmd, "--request " .. obj.method or 'GET')
+	table.insert(cmd, "--url " .. obj.url or '')
+	-- table.insert(cmd, "--header 'Cache-Control: no-cache'")
+	-- table.insert(cmd, "--header 'Content-Type: application/x-www-form-urlencoded'")
+	for key,val in pairs(obj.headers or {}) do
+		table.insert(cmd, string.format("--header '%s: %s'",key,val ))
+	end
+	table.insert(cmd, string.format("--data '%s'",obj.source) )
+	cmd = table.concat(cmd," " )
+	
+	local result = IOExec(cmd)
+	if (result == nil) then
+		warning(string.format("IOExec of commend(%s) returned nil",cmd))
+		return nil,nil
+	end
+	return true,result
+end
 
 local function FLIPRHttpCall(lul_device,verb,cmd,body)
 	local result = {}
@@ -260,14 +293,15 @@ local function FLIPRHttpCall(lul_device,verb,cmd,body)
 	local newUrl = (verb=="POST") and string.format("https://apis.goflipr.com/%s",cmd) 
 								  or string.format("https://apis.goflipr.com/modules/%s/%s",serial,cmd)
 					
-	debug(string.format("Calling Hue with %s %s , body:%s",verb,newUrl,body))
+	debug(string.format("Calling FLIPR with %s %s , body:%s",verb,newUrl,body))
 	local headers = {
 		-- ["Connection"]= "keep-alive",
+		-- ["Accept"]="text/plain, */*; q=0.01"
 		["Content-Length"] = body:len(),
+		["Cache-Control"] =  'no-cache',
 		["Content-Type"] = "application/x-www-form-urlencoded",
 		-- ["Origin"]="http://192.168.1.5",
 		-- ["User-Agent"]="Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.134 Safari/537.36",
-		["Accept"]="text/plain, */*; q=0.01"
 		-- ["X-Requested-With"]="XMLHttpRequest",
 		-- ["Accept-Encoding"]="gzip, deflate",
 		-- ["Accept-Language"]= "fr,fr-FR;q=0.8,en;q=0.6,en-US;q=0.4",
@@ -275,32 +309,48 @@ local function FLIPRHttpCall(lul_device,verb,cmd,body)
 	if not (isempty(credentials)) then 
 		headers["Authorization"] = string.format("Bearer %s",credentials)
 	end
-	local request, code, headers = https.request({
-		method=verb,
-		url = newUrl,
-		source= ltn12.source.string(body),
-		headers = headers,
-		sink = ltn12.sink.table(result)
-	})
+	
+	local request, code, data = nil,nil,nil
+	
+	-- For some reasons https.request ceased to work. I have not figured out why yet, that s a pitty, I fall back on io.popen( curl )
+	if (false) then
+		request, code, headers = https.request({
+			method=verb,
+			url = newUrl,
+			source= ltn12.source.string(body),
+			headers = headers,
+			sink = ltn12.sink.table(result)
+		})
 
-	-- fail to connect
-	if (request==nil) then
-		error(string.format("failed to connect to %s, http.request returned nil", newUrl))
-		return nil,"failed to connect"
-	elseif (code==401) then
-		warning(string.format("Access requires a user/password: %d", code))
-		return nil,"unauthorized access - 401"
-	elseif (code~=200) then
-		warning(string.format("http.request returned a bad code: %d", code))
-		return nil,"unvalid return code:" .. code
+		-- fail to connect
+		if (request==nil) then
+			error(string.format("failed to connect to %s, http.request returned nil", newUrl))
+			return nil,"failed to connect"
+		elseif (code==401) then
+			warning(string.format("Access requires a user/password: %d", code))
+			return nil,"unauthorized access - 401"
+		elseif (code~=200) then
+			warning(string.format("http.request returned a bad code: %d", code))
+			return nil,"unvalid return code:" .. code
+		end
+
+		-- everything looks good
+		data = table.concat(result)
+		debug(string.format("request:%s",request))
+		debug(string.format("code:%s",code))
+		debug(string.format("headers:%s",json.encode(headers)))
+		debug(string.format("data:%s",data or ""))
+	else
+		request,data = MyHttpsRequest({
+			method=verb,
+			url = newUrl,
+			source= body,
+			headers = headers
+		})
+		if (request==nil) then
+			return nil,nil
+		end
 	end
-
-	-- everything looks good
-	local data = table.concat(result)
-	debug(string.format("request:%s",request))
-	debug(string.format("code:%s",code))
-	debug(string.format("headers:%s",json.encode(headers)))
-	debug(string.format("data:%s",data or ""))
 	return json.decode(data) ,""
 end
 
@@ -309,7 +359,7 @@ local function FLIPR_getToken(lul_device,usr,pwd,serial)
 	local res,msg = FLIPRHttpCall(lul_device,
 		'POST',
 		'OAuth2/token',
-		string.format('grant_type=password&password=%s&username=%s',modurl.escape(pwd),modurl.escape(usr)) -- MyVariableOne=ValueOne&MyVariableTwo=ValueTwo
+		string.format('grant_type=password&password=%s&username=%s',pwd,usr) -- MyVariableOne=ValueOne&MyVariableTwo=ValueTwo
 	)
 	if (res~=nil) then
 		setVariableIfChanged(FLIPR_SERVICE, "Credentials", res.access_token, lul_device)
@@ -428,6 +478,7 @@ local function PairWithFLIPR(lul_device)
 	if (isempty(credentials)) then
 		local user = getSetVariable(FLIPR_SERVICE, "User", lul_device, "")
 		local pwd = getSetVariable(FLIPR_SERVICE, "Password", lul_device, "")
+		local serial = getSetVariable(FLIPR_SERVICE, "Serial", lul_device, "")
 		local data = FLIPR_getToken(lul_device,usr,pwd,serial)
 		success = (data.result ~= nil)
 	end
