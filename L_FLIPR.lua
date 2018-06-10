@@ -249,38 +249,36 @@ end
 -- POST	/ url	encode		https://apis.goflipr.com/OAuth2/token	
 -- GET https://apis.goflipr.com/modules/{serial}/survey/last 
 
-local function IOExec(command)
-	debug(string.format("IOExec(%s)",command))
-    local result = nil
-	local file = io.popen(command)
-	if file then
-		result = file:read("*a")
-		file:close()
-	end
-	return result
-end
+-- local function IOExec(command)
+	-- debug(string.format("IOExec(%s)",command))
+    -- local result = nil
+	-- local file = io.popen(command)
+	-- if file then
+		-- result = file:read("*a")
+		-- file:close()
+	-- end
+	-- return result
+-- end
 
-local function MyHttpsRequest( obj )
-	debug(string.format("MyHttpsRequest(%s)",json.encode(obj)))
-	local cmd = {}
-	table.insert(cmd, "curl")
-	table.insert(cmd, "--request " .. obj.method or 'GET')
-	table.insert(cmd, "--url " .. obj.url or '')
-	-- table.insert(cmd, "--header 'Cache-Control: no-cache'")
-	-- table.insert(cmd, "--header 'Content-Type: application/x-www-form-urlencoded'")
-	for key,val in pairs(obj.headers or {}) do
-		table.insert(cmd, string.format("--header '%s: %s'",key,val ))
-	end
-	table.insert(cmd, string.format("--data '%s'",obj.source) )
-	cmd = table.concat(cmd," " )
+-- local function MyHttpsRequest( obj )
+	-- debug(string.format("MyHttpsRequest(%s)",json.encode(obj)))
+	-- local cmd = {}
+	-- table.insert(cmd, "curl")
+	-- table.insert(cmd, "--request " .. obj.method or 'GET')
+	-- table.insert(cmd, "--url " .. obj.url or '')
+	-- for key,val in pairs(obj.headers or {}) do
+		-- table.insert(cmd, string.format("--header '%s: %s'",key,val ))
+	-- end
+	-- table.insert(cmd, string.format("--data '%s'",obj.source) )
+	-- cmd = table.concat(cmd," " )
 	
-	local result = IOExec(cmd)
-	if (result == nil) then
-		warning(string.format("IOExec of commend(%s) returned nil",cmd))
-		return nil,nil
-	end
-	return true,result
-end
+	-- local result = IOExec(cmd)
+	-- if (result == nil) then
+		-- warning(string.format("IOExec of commend(%s) returned nil",cmd))
+		-- return nil,nil
+	-- end
+	-- return true,result
+-- end
 
 local function FLIPRHttpCall(lul_device,verb,cmd,body)
 	local result = {}
@@ -313,8 +311,10 @@ local function FLIPRHttpCall(lul_device,verb,cmd,body)
 	local request, code, data = nil,nil,nil
 	
 	-- For some reasons https.request ceased to work. I have not figured out why yet, that s a pitty, I fall back on io.popen( curl )
-	if (false) then
+	-- found it, it was protocol restriction TLS 1.2 only
+	-- if (true) then
 		request, code, headers = https.request({
+			protocol="tlsv1_2",		-- mandatory, otherwise it fails ( and curl works )
 			method=verb,
 			url = newUrl,
 			source= ltn12.source.string(body),
@@ -340,17 +340,17 @@ local function FLIPRHttpCall(lul_device,verb,cmd,body)
 		debug(string.format("code:%s",code))
 		debug(string.format("headers:%s",json.encode(headers)))
 		debug(string.format("data:%s",data or ""))
-	else
-		request,data = MyHttpsRequest({
-			method=verb,
-			url = newUrl,
-			source= body,
-			headers = headers
-		})
-		if (request==nil) then
-			return nil,nil
-		end
-	end
+	-- else
+		-- request,data = MyHttpsRequest({
+			-- method=verb,
+			-- url = newUrl,
+			-- source= body,
+			-- headers = headers
+		-- })
+		-- if (request==nil) then
+			-- return nil,nil
+		-- end
+	-- end
 	return json.decode(data) ,""
 end
 
