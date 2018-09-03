@@ -15,6 +15,7 @@ local version		= "v0.3"
 local JSON_FILE = "D_FLIPR.json"
 local UI7_JSON_FILE = "D_FLIPR_UI7.json"
 local DEFAULT_REFRESH = 3600
+local RAND_DELAY	= 10
 -- local hostname		= ""
 
 local json = require("dkjson")
@@ -646,7 +647,7 @@ function initstatus(lul_device)
   log("initstatus("..lul_device..") starting version: "..version)
   checkVersion(lul_device)
   -- hostname = getIP()
-  local delay = 1	-- delaying first refresh by x seconds
+  local delay = math.random(RAND_DELAY)	-- delaying first refresh by x seconds
   debug("initstatus("..lul_device..") startup for Root device, delay:"..delay)
   luup.call_delay("startupDeferred", delay, tostring(lul_device))
 end
