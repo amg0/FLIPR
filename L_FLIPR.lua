@@ -308,7 +308,7 @@ local function FLIPRHttpCall(lul_device,verb,cmd,body)
 	if not (isempty(credentials)) then 
 		headers["Authorization"] = string.format("Bearer %s",credentials)
 	end
-	
+	debug(string.format("request headers:%s",json.encode(headers)))
 	local request, code, data = nil,nil,nil
 	
 	-- For some reasons https.request ceased to work. I have not figured out why yet, that s a pitty, I fall back on io.popen( curl )
@@ -337,7 +337,7 @@ local function FLIPRHttpCall(lul_device,verb,cmd,body)
 
 		-- everything looks good
 		data = table.concat(result)
-		debug(string.format("request:%s",request))
+		debug(string.format("response request:%s",request))
 		debug(string.format("code:%s",code))
 		debug(string.format("headers:%s",json.encode(headers)))
 		debug(string.format("data:%s",data or ""))
