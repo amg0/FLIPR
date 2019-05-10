@@ -11,7 +11,7 @@ local FLIPR_SERVICE	= "urn:upnp-org:serviceId:flipr1"
 local devicetype	= "urn:schemas-upnp-org:device:flipr:1"
 -- local this_device	= nil
 local DEBUG_MODE	= false -- controlled by UPNP action
-local version		= "v0.3"
+local version		= "v0.4"
 local JSON_FILE = "D_FLIPR.json"
 local UI7_JSON_FILE = "D_FLIPR_UI7.json"
 local DEFAULT_REFRESH = 3600
@@ -487,7 +487,7 @@ local function PairWithFLIPR(lul_device)
 end
 
 local function calculateBattery(value)
-	return 100 - tonumber(value)
+	return 100*tonumber(value)
 end
 
 local DataDecodeMap = {
